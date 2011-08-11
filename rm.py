@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import os
 from optparse import OptionParser
@@ -27,9 +29,14 @@ def gen_opt_for_mv(is_force, is_verbose):
 
 def check_if_directory_is_in_list(l):
     for p in l:
-        if os.path.isdir(p):
+        if os.path.isdir(os.path.expanduser(p)):
             return True
     return False
+
+def check_and_create_trash_dir(trash_dir):
+    if not os.path.exists(os.path.expanduser(trash_dir)):
+        print("Creating " + trash_dir + " first...")
+        os.system("mkdir -p " + trash_dir)
 
 def srcs_list2srcs_str(srcs_list):
     ret = ""
@@ -48,9 +55,14 @@ def exec_mv(srcs, destdir, option, is_recursive):
     os.system("mv" + option + " " + srcs_str + " " + destdir)
 
 def main():
+    trash_dir = "~/.Trash"
+
     args, options = parse_args()
     opt_for_mv = gen_opt_for_mv(options.force, options.verbose)
-    exec_mv(srcs=args, destdir="~/.Trash",
+
+    check_and_create_trash_dir(trash_dir)
+
+    exec_mv(srcs=args, destdir=trash_dir,
             option=opt_for_mv, is_recursive=options.recursive)
 
 if __name__ == '__main__':
